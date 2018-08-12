@@ -1,7 +1,7 @@
 from flask import current_app, request, url_for
 from . import db, login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -12,7 +12,7 @@ class Permission:
     COMMENT = 0x02
     WRITE_POSTS = 0x04
     MODERATE_COMMENTS = 0x08
-    ADMINISTRATOR = 0x80
+    ADMINISTER = 0x80
 
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -54,6 +54,14 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.role is None:
+            if self.email == current_app.config['ADMIN_EMAIL']:
+                self.role = Role.query.filter_by(permissions=0xff).first()
+            if self.role is None:
+                self.role = Role.query.filter_by(default=True).first()
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -67,3 +75,19 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+    def can(self, permissions):
+        return self.role is not None and \
+            (self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.can(Permission.ADMINISTER)
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+login_manager.anonymous_user = AnonymousUser

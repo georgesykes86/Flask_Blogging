@@ -8,6 +8,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or "\x850Ne\xff\xd1\xf2\xc85\xfe\xdd\xdb\x91'p\xff}\xe6\xed\x08\xbbW\x01)"
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 
     @staticmethod
     def init_app(app):
