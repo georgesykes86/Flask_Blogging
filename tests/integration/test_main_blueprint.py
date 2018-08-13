@@ -1,6 +1,5 @@
 import unittest
 from flask import url_for
-from flask_login import current_user
 from app import create_app, db
 from app.models import User, Role
 
