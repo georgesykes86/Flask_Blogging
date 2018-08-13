@@ -37,6 +37,7 @@ class UserModelTestCase(unittest.TestCase):
     def test_anonymous_user(self):
         user = AnonymousUser()
         self.assertFalse(user.can(Permission.FOLLOW))
+        self.assertFalse(user.is_administrator())
 
     def test_admin_user(self):
         self.assertTrue(self.admin_user.is_administrator())
