@@ -68,6 +68,7 @@ def edit_profile_admin(id):
         user.name = form.name.data
         user.location = form.location.data
         user.about_me = form.about_me.data
+        user.update_gravatar_hash()
         db.session.add(user)
         flash('The profile has been updated')
         return redirect(url_for('.user', id=user.id))
