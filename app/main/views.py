@@ -2,20 +2,21 @@ from flask import render_template, session, redirect, url_for, abort, flash \
 ,current_app, request
 from flask_login import login_required, current_user
 from . import main
-from .forms import EditProfileForm, EditProfileAdminForm
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm
 from .. import db
-from ..models import User, Role
+from ..models import User, Role, Post
 from ..decorators import admin_required, permission_required
 from ..models import Permission
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
-
-@main.route('/posts')
-@login_required
-def posts():
-    return render_template('index.html')
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(content=form.content.data, user=current_user._get_current_object())
+        db.session.add(post)
+        return redirect(url_for('.index'))
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', posts=posts, form=form)
 
 @main.route('/admin')
 @login_required
