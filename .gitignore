@@ -29,3 +29,5 @@ tmp/*
 venv
 *.pyc
 build
+
+geckodriver.log
